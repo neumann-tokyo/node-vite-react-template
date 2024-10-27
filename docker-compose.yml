@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  web:
+    build: .
+    command: tail -f /dev/null
+    volumes:
+      - .:/home/alice/web
+      - deno-dir-data:/home/alice/deno-dir
+    ports:
+      - "5544:5544"
+
+volumes:
+  deno-dir-data:
