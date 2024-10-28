@@ -10,22 +10,15 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"denoland.vscode-deno",
 				"wmaurer.change-case",
 				"sleistner.vscode-fileutils",
 				"usernamehw.errorlens",
 				"albymor.increment-selection",
 				"huizhou.githd",
-				"GitHub.github-vscode-theme",
 				"naumovs.color-highlight",
 				"biomejs.biome"
 			],
 			"settings": {
-				"deno.enable": true,
-				"deno.config": "/home/alice/web/deno.jsonc",
-				"deno.codeLens.implementations": true,
-				"deno.internalInspect": false,
-				"deno.path": "/usr/bin/deno",
 				"editor.formatOnSave": true,
 				"editor.formatOnSaveMode": "file",
 				"files.insertFinalNewline": true,
@@ -50,11 +43,7 @@
 				},
 				"[jsonc]": {
 					"editor.defaultFormatter": "biomejs.biome"
-				},
-				"[markdown]": {
-					"editor.defaultFormatter": "denoland.vscode-deno"
-				},
-				"workbench.colorTheme": "GitHub Dark Colorblind (Beta)"
+				}
 			}
 		}
 	}
