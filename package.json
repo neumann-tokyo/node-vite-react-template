@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
-		"check": "biome check --apply --no-errors-on-unmatched --files-ignore-unknown=true",
+		"check": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true",
 		"test": "vitest run",
 		"preview": "vite preview"
 	},

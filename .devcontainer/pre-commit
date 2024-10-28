@@ -15,7 +15,7 @@ do
 done
 
 if [ ${#TS_FILES[@]} -ne 0 ]; then
-  biome check --apply --no-errors-on-unmatched --files-ignore-unknown=true ${TS_FILES[*]}
+  pnpm run check ${TS_FILES[*]}
 fi
 
 git add -A /home/alice/web
