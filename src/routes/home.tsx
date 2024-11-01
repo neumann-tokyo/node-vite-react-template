@@ -4,22 +4,16 @@ import {
 	Input,
 	Spinner,
 	Table,
-	TableCaption,
 	TableContainer,
 	Tbody,
 	Td,
-	Tfoot,
 	Th,
 	Thead,
 	Tr,
 } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { useAtom, useAtomValue } from "jotai";
-import {
-	atomWithMutation,
-	atomWithQuery,
-	queryClientAtom,
-} from "jotai-tanstack-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAtomValue } from "jotai";
 import { useMemo, useState } from "react";
 import { Case, Default, Else, If, Switch, Then, When } from "react-if";
 import { useLocation } from "wouter";
@@ -33,37 +27,26 @@ import { useAdjustTimezone } from "../libs/adjust-timezone.ts";
 import { httpClient } from "../libs/http-client.ts";
 import type { Invitation } from "../types.ts";
 
-const invitationsAtom = atomWithQuery((get) => ({
-	queryKey: ["invitations"],
-	queryFn: async () =>
-		await httpClient({ jwtToken: get(jwtTokenAtom) })
-			.get("invitations")
-			.json(),
-}));
-const createInvitationAtom = atomWithMutation((get) => ({
-	mutationKey: ["create-invitation"],
-	mutationFn: (data: { expiredAt?: string }) =>
-		httpClient({ jwtToken: get(jwtTokenAtom) })
-			.post("invitations", { json: data })
-			.json(),
-	onSuccess: () => {
-		const queryClient = get(queryClientAtom);
-
-		queryClient.invalidateQueries({ queryKey: ["invitations"] });
-	},
-}));
-
 export function HomePage() {
 	const [parent] = useAutoAnimate();
 	const jwtToken = useAtomValue(jwtTokenAtom);
-	const queryClient = useAtomValue(queryClientAtom);
 	const currentTime = useMemo(() => new Date(), []);
 	const [_, navigate] = useLocation();
-	const [{ data, isPending, isError }] = useAtom(invitationsAtom);
 	const [showExpiredAt, setShowExpiredAt] = useState(false);
-	const [{ mutate, isPending: isCreateInvitationPending }] =
-		useAtom(createInvitationAtom);
 	const adjustTimezone = useAdjustTimezone();
+	const { data, isPending, isError, refetch } = useQuery({
+		queryKey: ["invitations"],
+		queryFn: async () =>
+			await httpClient({ jwtToken }).get("invitations").json(),
+	});
+	const { mutate, isPending: isCreateInvitationPending } = useMutation({
+		mutationKey: ["create-invitation"],
+		mutationFn: (data: { expiredAt?: string }) =>
+			httpClient({ jwtToken }).post("invitations", { json: data }).json(),
+		onSuccess: () => {
+			refetch();
+		},
+	});
 
 	const onSubmit = (e: any) => {
 		e.preventDefault();
@@ -77,7 +60,7 @@ export function HomePage() {
 			`invitations/${invitation.identifier}/delete`,
 		);
 		if (res.ok) {
-			queryClient.invalidateQueries({ queryKey: ["invitations"] });
+			refetch();
 		} else {
 			alert("Fail to remove the invitation link");
 		}

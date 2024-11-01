@@ -1,7 +1,7 @@
 import { Flex, Heading, Link } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import { useAtom, useSetAtom } from "jotai";
-import { atomEffect } from "jotai-effect";
-import { atomWithQuery } from "jotai-tanstack-query";
+import { useEffect } from "react";
 import { Redirect, Link as WouterLink, useLocation } from "wouter";
 import {
 	currentUserAtom,
@@ -14,34 +14,27 @@ import { httpClient } from "./libs/http-client.ts";
 import { Routes } from "./routes.tsx";
 import type { User } from "./types.ts";
 
-const fetchCurrentUserAtom = atomWithQuery((get) => ({
-	queryKey: ["current-user"],
-	queryFn: async () =>
-		await httpClient({ jwtToken: get(jwtTokenAtom) as string })
-			.get("users/me")
-			.json(),
-}));
-
-const jwtTokenEffect = atomEffect((get, set) => {
-	const jwtToken = get(jwtTokenAtom);
-
-	if (jwtToken) {
-		const { data, isSuccess } = get(fetchCurrentUserAtom);
-		if (isSuccess) {
-			set(currentUserAtom, data as User);
-		}
-	} else {
-		set(currentUserAtom, null);
-	}
-});
-
 const unauthenticatedPaths = ["^/$", "^/sign_up/.*$"];
 
 export function Layout() {
-	useAtom(jwtTokenEffect);
 	const [jwtToken] = useAtom(jwtTokenAtom);
 	const signOut = useSetAtom(signOutAtom);
 	const [location] = useLocation();
+	const setCurrentUser = useSetAtom(currentUserAtom);
+
+	const { data, isSuccess } = useQuery({
+		queryKey: ["current-user"],
+		queryFn: async () => await httpClient({ jwtToken }).get("users/me").json(),
+		enabled: jwtToken != null,
+	});
+
+	useEffect(() => {
+		if (jwtToken && isSuccess && data) {
+			setCurrentUser(data as User);
+		} else {
+			setCurrentUser(null);
+		}
+	}, [jwtToken, isSuccess, data, setCurrentUser]);
 
 	if (jwtToken == null) {
 		const match = unauthenticatedPaths.find((path) =>

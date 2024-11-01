@@ -6,9 +6,8 @@ import {
 	Heading,
 	Input,
 } from "@chakra-ui/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { atomWithMutation, queryClientAtom } from "jotai-tanstack-query";
-import { useEffect } from "react";
 import { When } from "react-if";
 import { useLocation } from "wouter";
 import { jwtTokenAtom } from "../../atoms/current-user.ts";
@@ -16,30 +15,25 @@ import { ErrorAlert } from "../../components/error-alert.tsx";
 import { Trans } from "../../components/trans.tsx";
 import { httpClient } from "../../libs/http-client.ts";
 
-const createNewTodoAtom = atomWithMutation((get) => ({
-	mutationKey: ["create-todo"],
-	mutationFn: async (data: {
-		title: string;
-	}) =>
-		await httpClient({
-			jwtToken: get(jwtTokenAtom),
-		})
-			.post("todos", { json: data })
-			.json(),
-}));
-
 export function TodosNewPage() {
-	const [{ mutate, isPending, isError, isSuccess }] =
-		useAtom(createNewTodoAtom);
+	const [jwtToken] = useAtom(jwtTokenAtom);
 	const [_, navigate] = useLocation();
-	const [queryClient] = useAtom(queryClientAtom);
-
-	useEffect(() => {
-		if (isSuccess) {
+	const queryClient = useQueryClient();
+	const { mutate, isPending, isError } = useMutation({
+		mutationKey: ["create-todo"],
+		mutationFn: async (data: {
+			title: string;
+		}) =>
+			await httpClient({
+				jwtToken,
+			})
+				.post("todos", { json: data })
+				.json(),
+		onSuccess: () => {
 			navigate("/todos");
 			queryClient.invalidateQueries({ queryKey: ["todos"] });
-		}
-	}, [isSuccess, navigate, queryClient]);
+		},
+	});
 
 	const onSubmit = (e: any) => {
 		e.preventDefault();

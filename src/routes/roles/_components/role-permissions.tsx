@@ -1,5 +1,4 @@
 import {
-	Box,
 	Flex,
 	Grid,
 	GridItem,
@@ -8,12 +7,8 @@ import {
 	Switch as SwitchUI,
 	Text,
 } from "@chakra-ui/react";
-import { useAtom, useAtomValue } from "jotai";
-import {
-	atomWithMutation,
-	atomWithQuery,
-	queryClientAtom,
-} from "jotai-tanstack-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 import { useMemo } from "react";
 import { Case, Default, Switch } from "react-if";
 import { jwtTokenAtom } from "../../../atoms/current-user.ts";
@@ -21,72 +16,52 @@ import { ErrorAlert } from "../../../components/error-alert.tsx";
 import { Trans } from "../../../components/trans.tsx";
 import { httpClient } from "../../../libs/http-client.ts";
 import type { Permission, Role } from "../../../types.ts";
-import {
-	type RolePermissionsAtomType,
-	rolePermissionsAtoms,
-} from "../_atoms/role-permissions-atoms.ts";
 import { RoleForm } from "./role-form.tsx";
 
-const permissionsAtom = atomWithQuery((get) => ({
-	queryKey: ["permissions"],
-	queryFn: async () =>
-		await httpClient({ jwtToken: get(jwtTokenAtom) as string })
-			.get("permissions")
-			.json(),
-}));
-const editPermissionAtom = atomWithMutation((get) => ({
-	mutationKey: ["edit-permission"],
-	mutationFn: async (data: {
-		roleIdentifier: string;
-		permissionIdentifier: string;
-		remove: boolean;
-	}) =>
-		await httpClient({
-			jwtToken: get(jwtTokenAtom),
-		})
-			.post(`roles/${data.roleIdentifier}/edit_permission`, {
-				json: {
-					permissionIdentifier: data.permissionIdentifier,
-					remove: data.remove,
-				},
-			})
-			.json(),
-	onSuccess: (res: any) => {
-		const queryClient = get(queryClientAtom);
-		queryClient.invalidateQueries({ queryKey: ["current-user"] });
-		queryClient.invalidateQueries({ queryKey: ["roles", res?.roleIdentifier] });
-	},
-}));
-
 export function RolePermissions({ role }: { role: Role }) {
-	const atoms = useAtomValue(rolePermissionsAtoms);
-	const found = useMemo<RolePermissionsAtomType | undefined>(
-		() => atoms.find((rpa) => rpa.roleIdentifier === role.identifier),
-		[atoms, role],
-	);
-	const [{ data, isPending, isError }] = found?.atom
-		? useAtom(found.atom)
-		: ([
-				{
-					data: null,
-					isPending: false,
-					isError: true,
-				},
-			] as any);
-	const [
-		{
-			data: permissionsData,
-			isPending: permissionsIsPending,
-			isError: permissionsIsError,
-		},
-	] = useAtom(permissionsAtom);
+	const [jwtToken] = useAtom(jwtTokenAtom);
+	const { data, isPending, isError, refetch } = useQuery({
+		queryKey: ["roles", role.identifier],
+		queryFn: async () =>
+			await httpClient({ jwtToken }).get(`roles/${role.identifier}`).json(),
+	});
+	const {
+		data: permissionsData,
+		isPending: permissionsIsPending,
+		isError: permissionsIsError,
+	} = useQuery({
+		queryKey: ["permissions"],
+		queryFn: async () =>
+			await httpClient({ jwtToken }).get("permissions").json(),
+	});
+
 	const havingPermissionIdentifiers = useMemo<string[]>(
 		() =>
 			(data as any)?.permissions?.map((p: Permission) => p.identifier) || [],
 		[data],
 	);
-	const [{ mutate, status: editPermissionStatus }] =
-		useAtom(editPermissionAtom);
+	const queryClient = useQueryClient();
+	const { mutate, status: editPermissionStatus } = useMutation({
+		mutationKey: ["edit-permission"],
+		mutationFn: async (data: {
+			permissionIdentifier: string;
+			remove: boolean;
+		}) =>
+			await httpClient({
+				jwtToken,
+			})
+				.post(`roles/${role.identifier}/edit_permission`, {
+					json: {
+						permissionIdentifier: data.permissionIdentifier,
+						remove: data.remove,
+					},
+				})
+				.json(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["current-user"] });
+			refetch();
+		},
+	});
 
 	return (
 		<Flex flexDirection="column">
@@ -128,7 +103,6 @@ export function RolePermissions({ role }: { role: Role }) {
 											onChange={(e) => {
 												e.preventDefault();
 												mutate({
-													roleIdentifier: role.identifier,
 													permissionIdentifier: permission.identifier,
 													remove: !e.target.checked,
 												});

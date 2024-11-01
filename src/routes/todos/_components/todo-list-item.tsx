@@ -1,6 +1,6 @@
 import { Button, Flex, ListItem } from "@chakra-ui/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { atomWithMutation, queryClientAtom } from "jotai-tanstack-query";
 import { Else, If, Then } from "react-if";
 import { jwtTokenAtom } from "../../../atoms/current-user.ts";
 import {
@@ -10,25 +10,25 @@ import {
 import { httpClient } from "../../../libs/http-client.ts";
 import type { Todo } from "../../../types.ts";
 
-const doneTodoAtom = atomWithMutation((get) => ({
-	mutationKey: ["done-todo"],
-	mutationFn: (data: {
-		id: number;
-	}) => {
-		return httpClient({
-			jwtToken: get(jwtTokenAtom),
-		})
-			.post(`todos/${data.id}/finish`)
-			.json();
-	},
-	onSuccess: (res) => {
-		const queryClient = get(queryClientAtom);
-		queryClient.invalidateQueries({ queryKey: ["todos"] });
-	},
-}));
-
 export function TodoListItem({ todo }: { todo: Todo }) {
-	const [{ mutate, isPending }] = useAtom(doneTodoAtom);
+	const [jwtToken] = useAtom(jwtTokenAtom);
+	const queryClient = useQueryClient();
+	const { mutate, isPending } = useMutation({
+		mutationKey: ["done-todo"],
+		mutationFn: (data: {
+			id: number;
+		}) => {
+			return httpClient({
+				jwtToken,
+			})
+				.post(`todos/${data.id}/finish`)
+				.json();
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["todos"] });
+		},
+	});
+
 	const onFinish = (e: any) => {
 		e.preventDefault();
 
@@ -53,6 +53,7 @@ export function TodoListItem({ todo }: { todo: Todo }) {
 							size="xs"
 							colorScheme="blue"
 							onClick={onFinish}
+							isLoading={isPending}
 						>
 							Done
 						</Button>

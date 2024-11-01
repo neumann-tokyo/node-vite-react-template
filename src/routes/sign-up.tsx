@@ -10,8 +10,7 @@ import {
 	Spinner,
 	Text,
 } from "@chakra-ui/react";
-import { useAtom } from "jotai";
-import { atomWithMutation } from "jotai-tanstack-query";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Else, If, Then, When } from "react-if";
 import { useLocation } from "wouter";
@@ -24,36 +23,31 @@ import { TimezoneSelect } from "../components/timezone-select.tsx";
 import { Trans } from "../components/trans.tsx";
 import { httpClient } from "../libs/http-client.ts";
 
-const verifyTokenAtom = atomWithMutation((_get) => ({
-	mutationKey: ["verify-invitation-token"],
-	mutationFn: async (data: { identifier?: string }) =>
-		await httpClient().post(`invitations/check/${data.identifier}`).json(),
-}));
-const signUpAtom = atomWithMutation((_get) => ({
-	mutationKey: ["sign-up"],
-	mutationFn: async (data: {
-		invitationIdentifier: string;
-		email: string;
-		password: string;
-		displayName: string;
-		timezone: string;
-		language: string;
-		datetimeFormat: string;
-	}) => await httpClient().post("users/sign_up", { json: data }).json(),
-}));
-
 export function SignUpPage() {
 	const params = useParams();
-	const [{ mutate, data, isPending, isError }] = useAtom(verifyTokenAtom);
-	const [
-		{
-			mutate: signUpMutate,
-			isPending: signUpIsPending,
-			isError: signUpIsError,
-			isSuccess: signUpIsSuccess,
-		},
-	] = useAtom(signUpAtom);
 	const [_, navigate] = useLocation();
+	const { mutate, data, isPending, isError } = useMutation({
+		mutationKey: ["verify-invitation-token"],
+		mutationFn: async (data: { identifier?: string }) =>
+			await httpClient().post(`invitations/check/${data.identifier}`).json(),
+	});
+	const {
+		mutate: signUpMutate,
+		isPending: signUpIsPending,
+		isError: signUpIsError,
+		isSuccess: signUpIsSuccess,
+	} = useMutation({
+		mutationKey: ["sign-up"],
+		mutationFn: async (data: {
+			invitationIdentifier: string;
+			email: string;
+			password: string;
+			displayName: string;
+			timezone: string;
+			language: string;
+			datetimeFormat: string;
+		}) => await httpClient().post("users/sign_up", { json: data }).json(),
+	});
 
 	const onSubmit = (e: any) => {
 		e.preventDefault();

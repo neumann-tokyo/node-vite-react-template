@@ -14,15 +14,10 @@ import {
 	Tr,
 	useDisclosure,
 } from "@chakra-ui/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import {
-	atomWithMutation,
-	atomWithQuery,
-	queryClientAtom,
-} from "jotai-tanstack-query";
 import { useState } from "react";
 import { Case, Default, Switch, When } from "react-if";
-import { rolesAtom } from "../../atoms/api.ts";
 import { currentUserAtom, jwtTokenAtom } from "../../atoms/current-user.ts";
 import { ErrorAlert } from "../../components/error-alert.tsx";
 import { Trans } from "../../components/trans.tsx";
@@ -30,58 +25,50 @@ import { httpClient } from "../../libs/http-client.ts";
 import type { Role, User } from "../../types.ts";
 import { EditUserDrawer } from "./_components/edit-user-drawer.tsx";
 
-const usersAtom = atomWithQuery((get) => ({
-	queryKey: ["users"],
-	queryFn: async () =>
-		await httpClient({ jwtToken: get(jwtTokenAtom) })
-			.get("users")
-			.json(),
-}));
-
-const updateUsersRoleAtom = atomWithMutation((get) => ({
-	mutationKey: ["update-users-role"],
-	mutationFn: (data: {
-		userId: number;
-		roles: string[];
-	}) =>
-		httpClient({
-			jwtToken: get(jwtTokenAtom),
-		})
-			.post(`users/${data.userId}/update_roles`, {
-				json: {
-					roles: data.roles,
-				},
-			})
-			.json(),
-	onSuccess: () => {
-		const queryClient = get(queryClientAtom);
-
-		queryClient.invalidateQueries({ queryKey: ["users"] });
-		queryClient.invalidateQueries({ queryKey: ["current-user"] });
-	},
-}));
-
-const rejectUserAtom = atomWithMutation((get) => ({
-	mutationKey: ["reject-user"],
-	mutationFn: (data: { userId: number }) =>
-		httpClient({ jwtToken: get(jwtTokenAtom) })
-			.post(`user/${data.userId}/reject`)
-			.json(),
-	onSuccess: () => {
-		const queryClient = get(queryClientAtom);
-		queryClient.invalidateQueries({ queryKey: ["users"] });
-	},
-}));
-
 export function UsersIndexPage() {
 	const [currentUser] = useAtom(currentUserAtom);
-	const [{ data: users, status: usersStatus }] = useAtom(usersAtom);
-	const [{ data: roles, status: rolesStatus }] = useAtom(rolesAtom);
-	const [{ mutate, status: updateStatus }] = useAtom(updateUsersRoleAtom);
-	const [{ mutate: rejectUser, status: rejectUserStatus }] =
-		useAtom(rejectUserAtom);
+	const [jwtToken] = useAtom(jwtTokenAtom);
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+	const queryClient = useQueryClient();
+	const { data: users, status: usersStatus } = useQuery({
+		queryKey: ["users"],
+		queryFn: async () => await httpClient({ jwtToken }).get("users").json(),
+	});
+	const { data: roles, status: rolesStatus } = useQuery({
+		queryKey: ["roles"],
+		queryFn: async () => await httpClient({ jwtToken }).get("roles").json(),
+	});
+
+	const { mutate, status: updateStatus } = useMutation({
+		mutationKey: ["update-users-role"],
+		mutationFn: (data: {
+			userId: number;
+			roles: string[];
+		}) =>
+			httpClient({
+				jwtToken,
+			})
+				.post(`users/${data.userId}/update_roles`, {
+					json: {
+						roles: data.roles,
+					},
+				})
+				.json(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["users"] });
+			queryClient.invalidateQueries({ queryKey: ["current-user"] });
+		},
+	});
+	const { mutate: rejectUser } = useMutation({
+		mutationKey: ["reject-user"],
+		mutationFn: (data: { userId: number }) =>
+			httpClient({ jwtToken }).post(`user/${data.userId}/reject`).json(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["users"] });
+		},
+	});
 
 	const onChangeRoles = (userId: number) => (roles: string[]) => {
 		mutate({

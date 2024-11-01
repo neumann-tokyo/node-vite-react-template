@@ -7,8 +7,8 @@ import {
 	UnorderedList,
 } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { atomWithQuery } from "jotai-tanstack-query";
 import { Else, If, Then } from "react-if";
 import { useLocation } from "wouter";
 import { jwtTokenAtom } from "../../atoms/current-user.ts";
@@ -18,16 +18,12 @@ import { httpClient } from "../../libs/http-client.ts";
 import type { Todo } from "../../types.ts";
 import { TodoListItem } from "./_components/todo-list-item.tsx";
 
-const todosAtom = atomWithQuery((get) => ({
-	queryKey: ["todos"],
-	queryFn: async () =>
-		await httpClient({ jwtToken: get(jwtTokenAtom) as string })
-			.get("todos")
-			.json(),
-}));
-
 export function TodosIndexPage() {
-	const [{ data, isPending, isError }] = useAtom(todosAtom);
+	const [jwtToken] = useAtom(jwtTokenAtom);
+	const { data, isPending, isError } = useQuery({
+		queryKey: ["todos"],
+		queryFn: async () => await httpClient({ jwtToken }).get("todos").json(),
+	});
 	const [_location, navigate] = useLocation();
 	const [parent] = useAutoAnimate();
 

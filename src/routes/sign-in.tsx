@@ -9,43 +9,32 @@ import {
 	Input,
 	Text,
 } from "@chakra-ui/react";
-import { atom, useAtom } from "jotai";
-import { atomEffect } from "jotai-effect";
-import { atomWithMutation } from "jotai-tanstack-query";
+import { useMutation } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 import Cookies from "js-cookie";
+import { useState } from "react";
 import { When } from "react-if";
-import { currentUserAtom, jwtTokenAtom } from "../atoms/current-user.ts";
+import { jwtTokenAtom } from "../atoms/current-user.ts";
 import { httpClient } from "../libs/http-client.ts";
 
-const signInErrorAtom = atom<boolean | null>(null);
-const signInPostAtom = atomWithMutation(() => ({
-	mutationKey: ["sign-in"],
-	mutationFn: (data: { email: string; password: string }) => {
-		return httpClient().post("users/sign_in", { json: data }).json();
-	},
-}));
-const signInEffect = atomEffect((get, set) => {
-	const { isPending, data, error } = get(signInPostAtom);
-	const signInError = get(signInErrorAtom);
-
-	if (signInError === null || isPending) {
-		return;
-	}
-
-	const token = (data as any)?.token;
-	if (!error && token) {
-		Cookies.set("jwt-token", token);
-		set(jwtTokenAtom, token);
-	} else {
-		console.error(error);
-		set(signInErrorAtom, true);
-	}
-});
-
 export function SignInPage() {
-	useAtom(signInEffect);
-	const [{ mutate, isPending }] = useAtom(signInPostAtom);
-	const [signInError, setSignInError] = useAtom(signInErrorAtom);
+	const [signInError, setSignInError] = useState(false);
+	const [_, setJwtToken] = useAtom(jwtTokenAtom);
+	const { mutate, isPending } = useMutation({
+		mutationKey: ["sign-in"],
+		mutationFn: (data: { email: string; password: string }) => {
+			return httpClient().post("users/sign_in", { json: data }).json();
+		},
+		onSuccess: (res: any) => {
+			const token = res.token;
+			Cookies.set("jwt-token", token);
+			setJwtToken(token);
+		},
+		onError: (error) => {
+			console.error(error);
+			setSignInError(true);
+		},
+	});
 
 	const onSubmit = (e: any) => {
 		e.preventDefault();
@@ -89,7 +78,7 @@ export function SignInPage() {
 									required={true}
 								/>
 							</FormControl>
-							<When condition={signInError === true}>
+							<When condition={signInError}>
 								<Text color="tomato">Invalid Email or Password</Text>
 							</When>
 							<Button type="submit" colorScheme="blue" isLoading={isPending}>

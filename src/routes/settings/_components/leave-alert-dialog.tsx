@@ -9,41 +9,36 @@ import {
 	Flex,
 	useDisclosure,
 } from "@chakra-ui/react";
+import { useMutation } from "@tanstack/react-query";
 import { useAtom, useSetAtom } from "jotai";
-import { atomWithMutation } from "jotai-tanstack-query";
 import { useRef } from "react";
-import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { jwtTokenAtom, signOutAtom } from "../../../atoms/current-user.ts";
 import { Trans } from "../../../components/trans.tsx";
 import { httpClient } from "../../../libs/http-client.ts";
 
-const leaveUserAtom = atomWithMutation((get) => ({
-	mutationKey: ["leave-user"],
-	mutationFn: () =>
-		httpClient({
-			jwtToken: get(jwtTokenAtom),
-		})
-			.post("users/leave")
-			.json(),
-}));
-
 export function LeaveAlertDialog() {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const cancelRef = useRef(null);
-	const [{ mutate, isPending, isSuccess, error }] = useAtom(leaveUserAtom);
+	const [jwtToken] = useAtom(jwtTokenAtom);
 	const [_, navigate] = useLocation();
 	const signOut = useSetAtom(signOutAtom);
-
-	useEffect(() => {
-		if (isSuccess) {
+	const { mutate, isPending } = useMutation({
+		mutationKey: ["leave-user"],
+		mutationFn: () =>
+			httpClient({
+				jwtToken,
+			})
+				.post("users/leave")
+				.json(),
+		onSuccess: () => {
 			signOut(null);
 			navigate("/");
-		}
-		if (error) {
+		},
+		onError: (error) => {
 			alert(error);
-		}
-	}, [isSuccess, signOut, navigate, error]);
+		},
+	});
 
 	return (
 		<>

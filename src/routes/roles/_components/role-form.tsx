@@ -10,8 +10,8 @@ import {
 	NumberInputField,
 	NumberInputStepper,
 } from "@chakra-ui/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { atomWithMutation, queryClientAtom } from "jotai-tanstack-query";
 import { Case, Switch } from "react-if";
 import { jwtTokenAtom } from "../../../atoms/current-user.ts";
 import { ErrorAlert } from "../../../components/error-alert.tsx";
@@ -20,50 +20,34 @@ import { Trans } from "../../../components/trans.tsx";
 import { httpClient } from "../../../libs/http-client.ts";
 import type { Role } from "../../../types.ts";
 
-const updateRoleAtom = atomWithMutation((get) => ({
-	mutationKey: ["update-role"],
-	mutationFn: async (data: {
-		identifier: string;
-		displayName: string;
-		description: string;
-		displayOrder: number;
-	}) => {
-		const { identifier: _, ...body } = data;
-		return await httpClient({ jwtToken: get(jwtTokenAtom) })
-			.post(`roles/${data.identifier}/update`, { json: body })
-			.json();
-	},
-	onSuccess: () => {
-		const queryClient = get(queryClientAtom);
-		queryClient.invalidateQueries({ queryKey: ["roles"] });
-	},
-}));
-
-const createRoleAtom = atomWithMutation((get) => ({
-	mutationKey: ["create-role"],
-	mutationFn: async (data: {
-		identifier: string;
-		displayName: string;
-		description: string;
-		displayOrder: number;
-	}) => {
-		return await httpClient({ jwtToken: get(jwtTokenAtom) })
-			.post("roles", { json: data })
-			.json();
-	},
-	onSuccess: () => {
-		const queryClient = get(queryClientAtom);
-		queryClient.invalidateQueries({ queryKey: ["roles"] });
-	},
-}));
-
 export function RoleForm({
 	role,
 	afterSubmit,
 }: { role?: Role; afterSubmit?: () => void }) {
-	const [{ mutate, isPending, isSuccess, isError }] = useAtom(
-		role ? updateRoleAtom : createRoleAtom,
-	);
+	const [jwtToken] = useAtom(jwtTokenAtom);
+	const queryClient = useQueryClient();
+	const { mutate, isPending, isSuccess, isError } = useMutation({
+		mutationFn: async (data: {
+			identifier: string;
+			displayName: string;
+			description: string;
+			displayOrder: number;
+		}) => {
+			if (role) {
+				const { identifier, ...body } = data;
+				return await httpClient({ jwtToken })
+					.post(`roles/${identifier}/update`, { json: body })
+					.json();
+			}
+
+			return await httpClient({ jwtToken })
+				.post("roles", { json: data })
+				.json();
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["roles"] });
+		},
+	});
 
 	const onSubmit = (e: any) => {
 		e.preventDefault();
