@@ -1,7 +1,7 @@
+import { currentUserAtom } from "@/atoms/current-user.ts";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 import spacetime from "spacetime";
-import { currentUserAtom } from "../atoms/current-user.ts";
 
 export const timeFormat = "{time} {second}s";
 export const defaultDateFormat = "{month} {date-ordinal} {year}";

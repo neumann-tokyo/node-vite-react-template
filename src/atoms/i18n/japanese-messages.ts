@@ -1,5 +1,5 @@
+import type { LanguageMessage } from "@/types.ts";
 import { atom } from "jotai";
-import type { LanguageMessage } from "../../types.ts";
 
 export const japaneseMessagesAtom = atom<LanguageMessage[]>([
 	{

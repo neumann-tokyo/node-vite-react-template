@@ -1,6 +1,6 @@
+import type { User } from "@/types.ts";
 import { atom } from "jotai";
 import Cookies from "js-cookie";
-import type { User } from "../types.ts";
 
 export const jwtTokenAtom = atom<string | undefined>(Cookies.get("jwt-token"));
 

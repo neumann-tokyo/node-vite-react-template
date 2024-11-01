@@ -1,3 +1,7 @@
+import { jwtTokenAtom } from "@/atoms/current-user.ts";
+import { ErrorAlert } from "@/components/error-alert.tsx";
+import { Trans } from "@/components/trans.tsx";
+import { httpClient } from "@/libs/http-client.ts";
 import {
 	Button,
 	Flex,
@@ -10,10 +14,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { When } from "react-if";
 import { useLocation } from "wouter";
-import { jwtTokenAtom } from "../../atoms/current-user.ts";
-import { ErrorAlert } from "../../components/error-alert.tsx";
-import { Trans } from "../../components/trans.tsx";
-import { httpClient } from "../../libs/http-client.ts";
 
 export function TodosNewPage() {
 	const [jwtToken] = useAtom(jwtTokenAtom);

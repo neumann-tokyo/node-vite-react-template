@@ -1,3 +1,9 @@
+import { jwtTokenAtom } from "@/atoms/current-user.ts";
+import { EditUserForm } from "@/components/edit-user-form.tsx";
+import { ErrorAlert } from "@/components/error-alert.tsx";
+import { Trans } from "@/components/trans.tsx";
+import { httpClient } from "@/libs/http-client.ts";
+import type { User } from "@/types.ts";
 import {
 	Drawer,
 	DrawerBody,
@@ -9,12 +15,6 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { Else, If, Then } from "react-if";
-import { jwtTokenAtom } from "../../../atoms/current-user.ts";
-import { EditUserForm } from "../../../components/edit-user-form.tsx";
-import { ErrorAlert } from "../../../components/error-alert.tsx";
-import { Trans } from "../../../components/trans.tsx";
-import { httpClient } from "../../../libs/http-client.ts";
-import type { User } from "../../../types.ts";
 
 export function EditUserDrawer({
 	isOpen,

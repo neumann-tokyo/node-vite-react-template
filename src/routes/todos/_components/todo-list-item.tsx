@@ -1,14 +1,11 @@
+import { jwtTokenAtom } from "@/atoms/current-user.ts";
+import { DatetimeFormat, FormatType } from "@/components/datetime-format.tsx";
+import { httpClient } from "@/libs/http-client.ts";
+import type { Todo } from "@/types.ts";
 import { Button, Flex, ListItem } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { Else, If, Then } from "react-if";
-import { jwtTokenAtom } from "../../../atoms/current-user.ts";
-import {
-	DatetimeFormat,
-	FormatType,
-} from "../../../components/datetime-format.tsx";
-import { httpClient } from "../../../libs/http-client.ts";
-import type { Todo } from "../../../types.ts";
 
 export function TodoListItem({ todo }: { todo: Todo }) {
 	const [jwtToken] = useAtom(jwtTokenAtom);

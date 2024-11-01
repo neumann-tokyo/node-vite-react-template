@@ -1,3 +1,9 @@
+import { jwtTokenAtom } from "@/atoms/current-user.ts";
+import { ErrorAlert } from "@/components/error-alert.tsx";
+import { SuccessAlert } from "@/components/success-alert.tsx";
+import { Trans } from "@/components/trans.tsx";
+import { httpClient } from "@/libs/http-client.ts";
+import type { Role } from "@/types.ts";
 import {
 	Button,
 	Flex,
@@ -13,12 +19,6 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { Case, Switch } from "react-if";
-import { jwtTokenAtom } from "../../../atoms/current-user.ts";
-import { ErrorAlert } from "../../../components/error-alert.tsx";
-import { SuccessAlert } from "../../../components/success-alert.tsx";
-import { Trans } from "../../../components/trans.tsx";
-import { httpClient } from "../../../libs/http-client.ts";
-import type { Role } from "../../../types.ts";
 
 export function RoleForm({
 	role,

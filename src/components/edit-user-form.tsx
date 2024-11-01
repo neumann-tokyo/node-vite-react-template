@@ -1,3 +1,4 @@
+import type { User } from "@/types.ts";
 import {
 	Box,
 	Button,
@@ -10,7 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { When } from "react-if";
-import type { User } from "../types.ts";
 import { DatetimeFormatSelect } from "./datetime-format-select.tsx";
 import { datetimeFormats } from "./datetime-format.tsx";
 import { LanguageSelect } from "./language-select.tsx";

@@ -1,3 +1,4 @@
+import { Trans } from "@/components/trans.tsx";
 import {
 	Drawer,
 	DrawerBody,
@@ -6,7 +7,6 @@ import {
 	DrawerHeader,
 	DrawerOverlay,
 } from "@chakra-ui/react";
-import { Trans } from "../../../components/trans.tsx";
 import { RoleForm } from "./role-form.tsx";
 
 export function RoleNewDrawer({

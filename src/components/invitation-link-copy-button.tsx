@@ -1,8 +1,8 @@
+import type { Invitation } from "@/types.ts";
 import { Box, Button, Flex, Input } from "@chakra-ui/react";
 import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { useMemo } from "react";
 import { When } from "react-if";
-import type { Invitation } from "../types.ts";
 import { SuccessAlert } from "./success-alert.tsx";
 import { Trans } from "./trans.tsx";
 

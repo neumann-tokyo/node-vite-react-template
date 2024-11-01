@@ -1,9 +1,9 @@
+import { currentUserAtom } from "@/atoms/current-user.ts";
+import { japaneseMessagesAtom } from "@/atoms/i18n/japanese-messages.ts";
+import type { LanguageMessage } from "@/types.ts";
 import { printf } from "fast-printf";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo } from "react";
-import { currentUserAtom } from "../atoms/current-user.ts";
-import { japaneseMessagesAtom } from "../atoms/i18n/japanese-messages.ts";
-import type { LanguageMessage } from "../types.ts";
 
 const currentMessagesAtom = atom<LanguageMessage[] | null>(null);
 

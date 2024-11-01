@@ -1,3 +1,8 @@
+import { jwtTokenAtom } from "@/atoms/current-user.ts";
+import { ErrorAlert } from "@/components/error-alert.tsx";
+import { Trans } from "@/components/trans.tsx";
+import { httpClient } from "@/libs/http-client.ts";
+import type { Permission, Role } from "@/types.ts";
 import {
 	Flex,
 	Grid,
@@ -11,11 +16,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useMemo } from "react";
 import { Case, Default, Switch } from "react-if";
-import { jwtTokenAtom } from "../../../atoms/current-user.ts";
-import { ErrorAlert } from "../../../components/error-alert.tsx";
-import { Trans } from "../../../components/trans.tsx";
-import { httpClient } from "../../../libs/http-client.ts";
-import type { Permission, Role } from "../../../types.ts";
 import { RoleForm } from "./role-form.tsx";
 
 export function RolePermissions({ role }: { role: Role }) {

@@ -1,3 +1,8 @@
+import { jwtTokenAtom } from "@/atoms/current-user.ts";
+import { ErrorAlert } from "@/components/error-alert.tsx";
+import { Trans } from "@/components/trans.tsx";
+import { httpClient } from "@/libs/http-client.ts";
+import type { Todo } from "@/types.ts";
 import {
 	Box,
 	Button,
@@ -11,11 +16,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { Else, If, Then } from "react-if";
 import { useLocation } from "wouter";
-import { jwtTokenAtom } from "../../atoms/current-user.ts";
-import { ErrorAlert } from "../../components/error-alert.tsx";
-import { Trans } from "../../components/trans.tsx";
-import { httpClient } from "../../libs/http-client.ts";
-import type { Todo } from "../../types.ts";
 import { TodoListItem } from "./_components/todo-list-item.tsx";
 
 export function TodosIndexPage() {

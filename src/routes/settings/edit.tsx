@@ -1,12 +1,12 @@
+import { currentUserAtom, jwtTokenAtom } from "@/atoms/current-user.ts";
+import { EditUserForm } from "@/components/edit-user-form.tsx";
+import { ErrorAlert } from "@/components/error-alert.tsx";
+import { httpClient } from "@/libs/http-client.ts";
 import { Flex, Heading } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { When } from "react-if";
 import { useLocation } from "wouter";
-import { currentUserAtom, jwtTokenAtom } from "../../atoms/current-user.ts";
-import { EditUserForm } from "../../components/edit-user-form.tsx";
-import { ErrorAlert } from "../../components/error-alert.tsx";
-import { httpClient } from "../../libs/http-client.ts";
 
 export function SettingsEditPage() {
 	const [jwtToken] = useAtom(jwtTokenAtom);

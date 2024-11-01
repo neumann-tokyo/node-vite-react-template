@@ -1,6 +1,6 @@
+import { currentUserAtom } from "@/atoms/current-user.ts";
 import { useAtomValue } from "jotai";
 import spacetime from "spacetime";
-import { currentUserAtom } from "../atoms/current-user.ts";
 
 export function useAdjustTimezone() {
 	const currentUser = useAtomValue(currentUserAtom);

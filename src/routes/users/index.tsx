@@ -1,3 +1,8 @@
+import { currentUserAtom, jwtTokenAtom } from "@/atoms/current-user.ts";
+import { ErrorAlert } from "@/components/error-alert.tsx";
+import { Trans } from "@/components/trans.tsx";
+import { httpClient } from "@/libs/http-client.ts";
+import type { Role, User } from "@/types.ts";
 import {
 	Button,
 	Checkbox,
@@ -18,11 +23,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { Case, Default, Switch, When } from "react-if";
-import { currentUserAtom, jwtTokenAtom } from "../../atoms/current-user.ts";
-import { ErrorAlert } from "../../components/error-alert.tsx";
-import { Trans } from "../../components/trans.tsx";
-import { httpClient } from "../../libs/http-client.ts";
-import type { Role, User } from "../../types.ts";
 import { EditUserDrawer } from "./_components/edit-user-drawer.tsx";
 
 export function UsersIndexPage() {

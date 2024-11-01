@@ -1,3 +1,8 @@
+import { jwtTokenAtom } from "@/atoms/current-user.ts";
+import { ErrorAlert } from "@/components/error-alert.tsx";
+import { Trans } from "@/components/trans.tsx";
+import { httpClient } from "@/libs/http-client.ts";
+import type { Role } from "@/types.ts";
 import {
 	Flex,
 	Heading,
@@ -15,11 +20,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { MdAddCircleOutline } from "react-icons/md";
 import { Case, Default, Switch } from "react-if";
-import { jwtTokenAtom } from "../../atoms/current-user.ts";
-import { ErrorAlert } from "../../components/error-alert.tsx";
-import { Trans } from "../../components/trans.tsx";
-import { httpClient } from "../../libs/http-client.ts";
-import type { Role } from "../../types.ts";
 import { RoleNewDrawer } from "./_components/role-new-drawer.tsx";
 import { RolePermissions } from "./_components/role-permissions.tsx";
 

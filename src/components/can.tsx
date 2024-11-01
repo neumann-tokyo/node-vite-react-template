@@ -1,7 +1,7 @@
+import { currentUserAtom } from "@/atoms/current-user.ts";
 import { useAtomValue } from "jotai";
 import type { ReactNode } from "react";
 import { When } from "react-if";
-import { currentUserAtom } from "../atoms/current-user.ts";
 
 export function usePermission(permissionIdentifier: string) {
 	const currentUser = useAtomValue(currentUserAtom);
