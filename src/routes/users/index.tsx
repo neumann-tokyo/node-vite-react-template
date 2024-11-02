@@ -4,6 +4,7 @@ import { Trans } from "@/components/trans.tsx";
 import { httpClient } from "@/libs/http-client.ts";
 import type { Role, User } from "@/types.ts";
 import {
+	Box,
 	Button,
 	Checkbox,
 	CheckboxGroup,
@@ -23,6 +24,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { Case, Default, Switch, When } from "react-if";
+import { useLocation } from "wouter";
 import { EditUserDrawer } from "./_components/edit-user-drawer.tsx";
 
 export function UsersIndexPage() {
@@ -30,6 +32,7 @@ export function UsersIndexPage() {
 	const [jwtToken] = useAtom(jwtTokenAtom);
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [selectedUser, setSelectedUser] = useState<User | null>(null);
+	const [_, navigate] = useLocation();
 
 	const queryClient = useQueryClient();
 	const { data: users, status: usersStatus } = useQuery({
@@ -82,6 +85,13 @@ export function UsersIndexPage() {
 			<Heading>
 				<Trans>Users Management</Trans>
 			</Heading>
+			<Flex justifyContent="flex-end" alignItems="center" width="100%">
+				<Box>
+					<Button colorScheme="blue" onClick={() => navigate("/users/new")}>
+						<Trans>New</Trans>
+					</Button>
+				</Box>
+			</Flex>
 			<Switch>
 				<Case
 					condition={

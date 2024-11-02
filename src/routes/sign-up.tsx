@@ -84,7 +84,7 @@ export function SignUpPage() {
 	return (
 		<If condition={(data as { success: boolean })?.success}>
 			<Then>
-				<>
+				<Box>
 					<Heading as="h1" size="4xl">
 						Sign Up
 					</Heading>
@@ -170,7 +170,7 @@ export function SignUpPage() {
 							</Box>
 						</Flex>
 					</form>
-				</>
+				</Box>
 			</Then>
 			<Else>
 				<>
